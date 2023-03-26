@@ -16,14 +16,12 @@ const handleSearchCounry = e => {
           'Too many matches found. Please enter a more specific name.'
         );
       } else if (data.length <= 10 && data.length > 1) {
-        countryListEl.innerHTML = '';
-        countryInfoEl.innerHTML = '';
+        clearMarkup();
         data.map(item => {
           markupListCountry(item);
         });
       } else if (data.length === 1) {
-        countryInfoEl.innerHTML = '';
-        countryListEl.innerHTML = '';
+        clearMarkup();
         data.map(item => {
           markupCountry(item);
         });
@@ -31,6 +29,8 @@ const handleSearchCounry = e => {
     })
     .catch(error => {
       if (error.message === '404') {
+                clearMarkup();
+
         Notiflix.Notify.failure('Oops, there is no country with that name.');
       } else {
         console.warn(error);
@@ -43,27 +43,38 @@ inputCountryEl.addEventListener(
   debounce(handleSearchCounry, DEBOUNCE_DELAY)
 );
 
-function markupListCountry(item) {
+function markupListCountry({name: { common },
+        flags: { svg }}) {
   countryListEl.insertAdjacentHTML(
     'beforeend',
     `<p class="country_name_list">
-    <img src="${item.flags.svg}" 
+    <img src="${svg}" 
     alt="country" class="country_flag" width="50">
-    ${item.name.common}</p>`
+    ${common}</p>`
   );
 }
 
-function markupCountry(item) {
+function markupCountry({name: { common },
+        flags: { svg },
+        capital,
+        population,
+        languages}
+) {
   countryInfoEl.insertAdjacentHTML(
     'afterbegin',
     `<p class="country_name">
-    <img src="${item.flags.svg}" alt="country" class="country_flag" width="50">
-    ${item.name.common}</p>
+    <img src="${svg}" alt="country" class="country_flag" width="50">
+    ${common}</p>
     <p class="country_item"><span class="country_title">Capital:</span> 
-    ${item.capital[0]}</p>
+    ${capital[0]}</p>
     <p class="country_item"><span class="country_title">Population:</span> 
-    ${item.population}</p>
+    ${population}</p>
     <p class="country_item"><span class="country_title">Languages:</span>
-    ${Object.values(item.languages).join(', ')}</p>`
+    ${Object.values(languages).join(', ')}</p>`
   );
+}
+
+function clearMarkup() {
+        countryListEl.innerHTML = '';
+        countryInfoEl.innerHTML = '';
 }
